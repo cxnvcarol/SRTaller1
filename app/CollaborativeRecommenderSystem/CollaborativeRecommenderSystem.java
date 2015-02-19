@@ -8,7 +8,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
     private boolean itemBased;
     private int similarityMethod;
     private double trainingPercent;
-    private int neighboorsQuantity;
+    private int neighborsQuantity;
     private boolean evaluationUpdated;
 
     private ResultModel[] resultsModelList;
@@ -24,7 +24,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
     private void setDefaultParameters() {
         itemBased=false;
         trainingPercent=0.1;
-        neighboorsQuantity=20;
+        neighborsQuantity =20;
         similarityMethod=SIMILARITY_METHOD_JACCARD;
 
         evaluationUpdated =false;
@@ -91,9 +91,9 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
     @Override
     public void setNeighborsQuantity(int neighborsQuantityP) {
-        if(neighboorsQuantity!=neighborsQuantityP)
+        if(neighborsQuantity !=neighborsQuantityP)
         {
-            neighboorsQuantity=neighborsQuantityP;
+            neighborsQuantity =neighborsQuantityP;
             updateModel();
         }
     }
