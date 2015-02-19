@@ -1,6 +1,6 @@
-// @SOURCE:/home/carol/Repos/SRTaller1/CollaborativeSystem/conf/routes
+// @SOURCE:/home/carol/Repos/CollaborativeSystem/conf/routes
 // @HASH:b31e3ed4075748bc0576b3b7654b92b97f9d84ad
-// @DATE:Thu Feb 19 08:25:55 COT 2015
+// @DATE:Thu Feb 19 11:51:26 COT 2015
 
 
 import play.core._
