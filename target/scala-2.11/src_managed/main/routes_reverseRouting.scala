@@ -1,6 +1,6 @@
-// @SOURCE:/home/carol/Repos/CollaborativeSystem/conf/routes
+// @SOURCE:/home/carol/Repos/CollaborationSystem/conf/routes
 // @HASH:b31e3ed4075748bc0576b3b7654b92b97f9d84ad
-// @DATE:Thu Feb 19 11:51:26 COT 2015
+// @DATE:Fri Feb 20 08:28:38 COT 2015
 
 import Routes.{prefix => _prefix, defaultPrefix => _defaultPrefix}
 import play.core._
