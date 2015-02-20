@@ -19,9 +19,9 @@ public class Rating {
     }
 
     private Movie movie;
-    public Rating(Movie movieP,double newRating)
+    public Rating(int movieP,double newRating)
     {
-        movie=movieP;
+        movie=Movie.find(movieP);
         rating=newRating;
     }
 }
