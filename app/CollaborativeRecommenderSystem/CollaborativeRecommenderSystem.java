@@ -47,7 +47,6 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
 
     private DataModel dataModel;
-    private DataModel dataModelTest;
     private PlusAnonymousConcurrentUserDataModel plusDataModel;
     private Recommender recommender;
     
@@ -80,7 +79,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
         File tt=Play.application().getFile(RATINGS_TEST_PATH);
         try {
-            dataModelTest= new FileDataModel(tt);
+            DataModel dataModelTest = new FileDataModel(tt);
             for(User u:User.getAll())
             {
                 if(!u.isNewUser()&&u.getRatings().size()>0)
