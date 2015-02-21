@@ -4,7 +4,7 @@ package CollaborativeRecommenderSystem;
  * Created by carol on 19/02/15.
  */
 public class Recommendation {
-    public Recommendation(int movieId,double r)
+    public Recommendation(long movieId,double r)
     {
         movie=Movie.find(movieId);
         setPredictedRating(r);

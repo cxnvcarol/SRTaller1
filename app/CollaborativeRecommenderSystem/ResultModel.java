@@ -7,6 +7,15 @@ public class ResultModel {
     public double distance;
     public double estimatedRating;
     public double realRating;
-    public int itemId;
-    public int userId;
+    public long itemId;
+    public long userId;
+    public ResultModel(long uid,long iid,double realR,double estimatedR)
+    {
+        userId=uid;
+        itemId=iid;
+        realRating=realR;
+        estimatedRating=estimatedR;
+        distance=realRating-estimatedR;
+        if(distance<0) distance*=-1;
+    }
 }

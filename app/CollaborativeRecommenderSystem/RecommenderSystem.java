@@ -14,8 +14,8 @@ public interface RecommenderSystem {
     public StatisticsModel evaluateModel();
     public ResultModel[] evaluateModelDetail();
     public Recommendation[] getUserRecommendation(int userId, int numMax);
-    public User loadUser(int userId);
-    public void rate(int userId, int itemId, double rating);
+    public User loadUser(long userId);
+    public void rate(long userId, long itemId, double rating);
     public User registerUser();
     public void setItemBased(boolean itemBasedBool);
     public void setNeighborsQuantity(int neighborsQuantity);

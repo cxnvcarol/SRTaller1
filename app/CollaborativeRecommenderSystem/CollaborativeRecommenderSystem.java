@@ -1,6 +1,7 @@
 package CollaborativeRecommenderSystem;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.model.PlusAnonymousConcurrentUserDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
@@ -10,17 +11,17 @@ import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
-import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.apache.mahout.math.hadoop.similarity.cooccurrence.measures.CosineSimilarity;
 import play.Play;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,8 +32,8 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
     private static final String RATINGS_PATH="data/ratings.csv";
     public static final String RATINGS_TRAINING_PATH="data/ratingsTraining.csv";
     private static final String RATINGS_TEST_PATH="data/ratingsTest.csv";
-    private static final String USERS_PATH="data/users.csv";
-    private static final String MOVIES_PATH="data/movies.csv";
+    public static final String USERS_PATH="data/users.csv";
+    public static final String MOVIES_PATH="data/movies.csv";
 
     private boolean itemBased;
     private int similarityMethod;
@@ -46,6 +47,9 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
 
     private DataModel dataModel;
+    private DataModel dataModelTest;
+    private PlusAnonymousConcurrentUserDataModel plusDataModel;
+    private Recommender recommender;
     
     public CollaborativeRecommenderSystem()
     {
@@ -73,15 +77,70 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
     private void updateModelEvaluation() {
         updateModel();
-        //TODO recalculate statistics and result (1)
+
+        File tt=Play.application().getFile(RATINGS_TEST_PATH);
+        try {
+            dataModelTest= new FileDataModel(tt);
+            for(User u:User.getAll())
+            {
+                if(!u.isNewUser()&&u.getRatings().size()>0)
+                {
+                    PreferenceArray prefs = dataModelTest.getPreferencesFromUser(u.getId());
+                    long[] prefIds=prefs.getIDs();
+
+                    PreferenceArray prefsOrig = dataModel.getPreferencesFromUser(u.getId());
+                    long[] prefIdsOrig=prefsOrig.getIDs();
+                    resultsModelList=new ResultModel[prefIds.length>prefIdsOrig.length?prefIdsOrig.length-prefIds.length:0];
+                    int j=0;
+                    for (int i = 0; i < prefIds.length&&j<resultsModelList.length; i++) {
+                        int isIt = Arrays.binarySearch(prefIdsOrig, prefs.getItemID(0));
+
+                        if(isIt<0)
+                        {
+                            double estimated=recommender.estimatePreference(u.getId(),prefs.getItemID(i));
+                            resultsModelList[j]=new ResultModel(u.getId(),prefs.getItemID(i),prefs.getValue(i),estimated);
+                            j++;
+                        }
+                    }
+                    if(j!=resultsModelList.length)
+                    {
+                        System.err.print("Sizes for evaluation arrays does not match for user id "+u.getId()+"...\n");
+                    }
+                }
+            }
+
+        } catch (IOException | TasteException e) {
+            e.printStackTrace();
+        }
+        statisticsModel=new StatisticsModel(resultsModelList);
         evaluationUpdated =true;
     }
+
+
     private void updateModel() {
-        File tt=Play.application().getFile(RATINGS_TRAINING_PATH);
         try {
-            dataModel= new FileDataModel(tt);
+            ItemSimilarity similarity = null;
+            switch (similarityMethod) {
+                case SIMILARITY_METHOD_JACCARD:
+                    similarity = new TanimotoCoefficientSimilarity(dataModel);
+                    break;
+                case SIMILARITY_METHOD_COSINE:
+                    similarity = new UncenteredCosineSimilarity(dataModel);
+                    break;
+                case SIMILARITY_METHOD_PEARSON:
+                    similarity = new PearsonCorrelationSimilarity(dataModel);
+                    break;
+            }
+            if (itemBased) {
+                recommender = new GenericItemBasedRecommender(dataModel, similarity);
+            } else {
+                UserSimilarity similarityU= (UserSimilarity) similarity;
+                UserNeighborhood neighborhood = new NearestNUserNeighborhood(neighborsQuantity, similarityU, dataModel);
+                recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarityU);
+            }
+
             modelUpdated=true;
-        } catch (IOException e) {
+        } catch (TasteException e) {
             e.printStackTrace();
         }
     }
@@ -103,34 +162,18 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
             updateModel();
         }
         try {
-            if(loadUser(userId)!=null) {
-
-                ItemSimilarity similarity = null;
-                switch (similarityMethod) {
-                    case SIMILARITY_METHOD_JACCARD:
-                        similarity = new TanimotoCoefficientSimilarity(dataModel);
-                        break;
-                    case SIMILARITY_METHOD_COSINE:
-                        similarity = new UncenteredCosineSimilarity(dataModel);
-                        break;
-                    case SIMILARITY_METHOD_PEARSON:
-                        similarity = new PearsonCorrelationSimilarity(dataModel);
-                        break;
-                }
-                Recommender recommender=null;
-                if (itemBased) {
-                    recommender = new GenericItemBasedRecommender(dataModel, similarity);
-                } else {
-                    UserSimilarity similarityU= (UserSimilarity) similarity;
-                    UserNeighborhood neighborhood = new NearestNUserNeighborhood(neighborsQuantity, similarityU, dataModel);
-                    recommender = new GenericUserBasedRecommender(dataModel, neighborhood, similarityU);
+            User found=loadUser(userId);
+            if(found!=null) {
+                if(found.isNewUser())
+                {
+                    plusDataModel.setTempPrefs(found.getPreferenceArray(),found.getId());
                 }
                 List<RecommendedItem> recommendations = recommender.recommend(userId, numMax);
                 Recommendation[] returned=new Recommendation[recommendations.size()];
 
                 for (int i = 0; i < recommendations.size(); i++) {
                     RecommendedItem recommendation=recommendations.get(i);
-                    returned[i]=new Recommendation((int)recommendation.getItemID(),recommendation.getValue());
+                    returned[i]=new Recommendation(recommendation.getItemID(),recommendation.getValue());
                 }
                 return returned;
             }
@@ -158,18 +201,36 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
 
 
     @Override
-    public User loadUser(int userId) {
+    public User loadUser(long userId) {
         return User.find(userId);
     }
 
     @Override
-    public void rate(int userId, int itemId, double rating) {
-        //TODO set new temporary rating (5)
+    public void rate(long userId, long itemId, double rating) {
+        User myus=User.find(userId);
+        if(myus!=null)
+        {
+            User u=User.find(userId);
+            u.addRating(itemId,rating);
+            if(!u.isNewUser())
+            {
+                try {
+                    dataModel.setPreference(userId,itemId, (float) rating);
+                } catch (TasteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.err.print("User not found for rating...\n");
+
     }
 
     @Override
     public User registerUser() {
-        return new User(User.lastUser+1);
+        long id=plusDataModel.takeAvailableUser();
+        User added=new User(id);
+        User.addUser(added);
+        return added;
     }
 
     @Override
@@ -219,7 +280,6 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
             String parentPath=src.getParentFile().getAbsolutePath();
 
             File trainingFile=new File(parentPath+"/ratingsTrainig.csv");
-            trainingFile.createNewFile();
             FileWriter fw = new FileWriter(trainingFile.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
             for (int i = 0; i < lnTraining; i++) {
@@ -228,7 +288,6 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
             bw.close();
 
             File testFile=new File(parentPath+"/ratingsTest.csv");
-            testFile.createNewFile();
             fw = new FileWriter(testFile.getAbsoluteFile());
             bw = new BufferedWriter(fw);
             for (int i = lnTraining; i <totalLines ; i++) {
@@ -237,6 +296,16 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
             bw.close();
             br.close();
 
+            File tt=Play.application().getFile(RATINGS_TRAINING_PATH);
+            dataModel= new FileDataModel(tt);
+            plusDataModel=new PlusAnonymousConcurrentUserDataModel(dataModel,100);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Movie.getAll();
+            User.getAll();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -245,8 +314,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
     }
 
     public static int countLines(File file) throws IOException {
-        InputStream is = new BufferedInputStream(new FileInputStream(file));
-        try {
+        try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
             byte[] c = new byte[1024];
             int count = 0;
             int readChars = 0;
@@ -254,14 +322,12 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
             while ((readChars = is.read(c)) != -1) {
                 empty = false;
                 for (int i = 0; i < readChars; ++i) {
-                    if (c[i] == '\n') {
+                    if ('\n' == c[i]) {
                         ++count;
                     }
                 }
             }
             return (count == 0 && !empty) ? 1 : count;
-        } finally {
-            is.close();
         }
     }
 
@@ -273,7 +339,6 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
         long diff=System.currentTimeMillis()-start;
         System.out.println("Data separated...  Ellapsed in "+diff+"ms.");
 
-        //http://www.warski.org/blog/2013/10/creating-an-on-line-recommender-system-with-apache-mahout/
 
         File tt=Play.application().getFile("data/test.csv");
         DataModel model= new FileDataModel(tt);

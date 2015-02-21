@@ -2,7 +2,6 @@ package controllers;
 
 import CollaborativeRecommenderSystem.*;
 import org.apache.mahout.cf.taste.common.TasteException;
-import play.*;
 import play.mvc.*;
 
 import views.html.*;
@@ -12,7 +11,7 @@ import java.io.IOException;
 public class Application extends Controller {
 
     public static Result index() {
-        //TODO JC: hay que crear una instancia por sesion (no tengo claro como)
+        //TODO JC: hay que crear una instancia por sesion (no tengo claro como) (coger una instancia estática?)
         //RecommenderSystem recommenderSystem=new CollaborativeRecommenderSystem();
         CollaborativeRecommenderSystem recommenderSystem=new CollaborativeRecommenderSystem();
         try {

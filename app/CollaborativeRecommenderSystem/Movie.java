@@ -14,7 +14,7 @@ import java.util.Comparator;
  * Created by carol on 19/02/15.
  */
 public class Movie {
-    private int id;
+    private long id;
 
     public double getAverageRating() {
         return averageRating;
@@ -34,13 +34,11 @@ public class Movie {
     private String categories;
     private static Movie[] allMovies;
 
-    public static String MOVIES_PATH="data/movies.csv";
-
-    public int getId()
+    public long getId()
     {
         return id;
     }
-    public Movie(int idp) throws Exception {
+    public Movie(long idp) throws Exception {
         numRatings=0;
         averageRating=0;
         Movie[] allm=getAll();
@@ -62,10 +60,9 @@ public class Movie {
         categories=categoriesP;
     }
 
-    public static Movie find(int movieId) {
+    public static Movie find(long movieId) {
         try {
-            Movie ret=new Movie(movieId);
-            return ret;
+            return new Movie(movieId);
         } catch (Exception e) {
             return null;
         }
@@ -98,9 +95,9 @@ public class Movie {
             System.out.print("Finding all movies...");
             ArrayList<Movie> movies=new ArrayList<Movie>();
 
-            BufferedReader br=new BufferedReader(new FileReader(Play.application().getFile(MOVIES_PATH)));
-            String ln="";
-            String[] splited=null;
+            BufferedReader br=new BufferedReader(new FileReader(Play.application().getFile(CollaborativeRecommenderSystem.MOVIES_PATH)));
+            String ln;
+            String[] splited;
             while((ln=br.readLine())!=null&&ln.length()>0)
             {
                 splited=ln.split(",");
@@ -108,16 +105,13 @@ public class Movie {
                 {
                     movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]));
                 }
-                catch(NumberFormatException e)
-                {
-                    e.printStackTrace();
-                }
-                catch (ArrayIndexOutOfBoundsException e)
+                catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
                 {
                     e.printStackTrace();
                 }
             }
             allMovies=movies.toArray(new Movie[movies.size()]);
+            br.close();
         }
         return allMovies;
     }
