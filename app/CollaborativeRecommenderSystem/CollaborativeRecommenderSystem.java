@@ -34,6 +34,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
     private static final String RATINGS_TEST_PATH="data/ratingsTest.csv";
     public static final String USERS_PATH="data/users.csv";
     public static final String MOVIES_PATH="data/movies.csv";
+	private static CollaborativeRecommenderSystem sInstance = null;
 
     private boolean itemBased;
     private int similarityMethod;
@@ -55,6 +56,15 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem{
         setDefaultParameters();
         reloadData();
         updateModelEvaluation();
+    }
+    
+    public static CollaborativeRecommenderSystem getInstance()
+    {
+    	if(sInstance == null)
+    	{
+    		sInstance = new CollaborativeRecommenderSystem();
+    	}
+    	return sInstance;
     }
 
     private void setDefaultParameters() {
