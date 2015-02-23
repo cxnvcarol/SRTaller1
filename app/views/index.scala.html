@@ -1,7 +1,83 @@
-@(message: String)
+@(message: String) @main("Welcome to Play") {
 
-@main("Welcome to Play") {
-
+<div>
+	<table width="100%" border="0">
+		<form>
+		<tr>
+			<td width="35%">
+				<table width="100%" border="0">
+					<tr>
+						<p>
+							<strong>EVALUACION DEL MODELO</strong>
+						</p>
+					</tr>
+					<tr>
+						<td>ID de Usuario:</td>
+						<td><input type="text" name="userid" style="width:100%"></td>
+					</tr>
+					<tr>
+						<td>Tipo de Modelo:</td>
+						<td><select name="modeltype" style="width:100%">
+								<option value="1">Item Based</option>
+								<option value="0">User Based</option>
+						</select></td>
+					</tr>
+					<tr>
+						<td>Método de Recomendación:</td>
+						<td><select name="similaritymethod" style="width:100%">
+								<option value="1">Jacqard</option>
+								<option value="2">Coseno</option>
+								<option value="3">Pearson</option>
+						</select></td>
+					</tr>
+					<tr>
+						<td>Cantidad de Vecinos:</td>
+						<td><input type="number" name="neighborsquantity" style="width:100%"></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td><button style="width: 100%" align="center">Evaluar</button>
+						</td>
+					</tr>
+				</table>
+				</form>
+			</td>
+			<td width="35%" align="left" valign="top">
+				<p>
+					<strong>TUS RECOMENDACIONES:</strong>
+				</p>
+				<p id="listarecomendaciones"></p>
+			</td>
+		</tr>
+		<td></td>
+	</table>
+</div>
+<div>
+<p>&nbsp;</p>
+<p>
+	<strong>ESTADISTICAS</strong>
+</p>
+<table width="400" border="0">
+	<tr>
+		<td>Distancia Promedio:</td>
+		<td><input type="text" name="averagedistance"></td>
+	</tr>
+	<tr>
+		<td>Desviación Estándar:</td>
+		<td><input type="text" name="standarddeviation"></td>
+	</tr>
+	<tr>
+		<td>Distancia Máxima:</td>
+		<td><input type="text" name="maxdistance"></td>
+	</tr>
+	<tr>
+		<td>Distancia Mínima:</td>
+		<td><input type="text" name="mindistance"></td>
+	</tr>
+</table>
+</div>
+<!--
     @play20.welcome(message, style = "Java")
+    -->
 
 }
