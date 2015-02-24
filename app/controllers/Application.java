@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import views.html.*;
 
 public class Application extends Controller {
-	//public static final CollaborativeRecommenderSystem recommenderSystem=CollaborativeRecommenderSystem.getInstance();
+	public static final CollaborativeRecommenderSystem recommenderSystem=CollaborativeRecommenderSystem.getInstance();
 	public static final int user = -1;
 
     public static Result index() {
