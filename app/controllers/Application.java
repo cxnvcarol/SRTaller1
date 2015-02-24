@@ -18,67 +18,69 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import views.html.*;
 
 public class Application extends Controller {
-	public static final CollaborativeRecommenderSystem recommenderSystem=CollaborativeRecommenderSystem.getInstance();
-	public static final int user = -1;
+	public static final CollaborativeRecommenderSystem recommenderSystem = CollaborativeRecommenderSystem.getInstance();
+	public static int user =-1;
 
     public static Result index() {
         //TODO JC: hay que crear una instancia por sesion (no tengo claro como) (coger una instancia estática?)
         //RecommenderSystem recommenderSystem=new CollaborativeRecommenderSystem();
-        /**CollaborativeRecommenderSystem recommenderSystem=new CollaborativeRecommenderSystem();
-        try {
+        //CollaborativeRecommenderSystem recommenderSystem=new CollaborativeRecommenderSystem();
+        /**try {
             recommenderSystem.testMahout();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TasteException e) {
             e.printStackTrace();
-        }
+        }*/
     	
     	StatisticsModel estadisticas = recommenderSystem.evaluateModel();
+    	System.out.println("Estadisticas de evaluacion: "+estadisticas.averageDistance+" "+estadisticas.maxDistance+" "+estadisticas.minDistance+" "+estadisticas.standardDeviation+" ");
     	double averageDistance = estadisticas.averageDistance;
     	double standardDeviation = estadisticas.standardDeviation;
     	double maxdistance = estadisticas.maxDistance;
     	double mindistance = estadisticas.minDistance;
-    	*/
+    	
+    	Recommendation[] recomendaciones =  new Recommendation[0];
+    	if(user!= -1)
+    	{
+    		recomendaciones = recommenderSystem.getUserRecommendation(user, 10);
+    	}
+    	
+    	/**
     	double averageDistance = 21;
     	double standardDeviation = 22;
     	double maxdistance = 23;
     	double mindistance = 24;
-    	
+    	*/
         return ok(index.render(averageDistance+"", standardDeviation+"", maxdistance+"", mindistance+""));
     }
     public static Result evaluate(){
-    	String evaluar = Form.form().bindFromRequest().get("evaluar");
-    	if(evaluar!=null)
-        	System.out.println("EVALUO!!!!");
-    	else
-        	System.out.println("NO EVALUO :(");
     		
-    	//TODO setEn el modelo
     	String userID = Form.form().bindFromRequest().get("userid");
     	boolean itemBase = Boolean.parseBoolean(Form.form().bindFromRequest().get("modeltype"));
     	String recommendationmethod = Form.form().bindFromRequest().get("similaritymethod");
     	String neighbors = Form.form().bindFromRequest().get("neighborsquantity");
     	String trainingP = Form.form().bindFromRequest().get("trainingset");
     	
-    	System.out.println("Datos: \n Usuario:"+userID+"\n itemBase:"+itemBase+
+    	System.out.println("Datos: \n Usuario:"+userID+"\n itemBased:"+itemBase+
     			"\n recommendationMethod: "+recommendationmethod+
     			"\n neighbors: "+neighbors+
     			"\n training%: "+trainingP);
     	
-    	/**
     	int userI = Integer.parseInt(userID);
     	int neighborsQ = Integer.parseInt(neighbors);
     	int similarityM = Integer.parseInt(recommendationmethod);
-    	double trainingPercentP = Double.parseDouble(trainingP);
-    	*/
+    	double trainingPercentP = (Double.parseDouble(trainingP))/100;
     	
-    	/**
+    	user = userI;
+    	
     	recommenderSystem.setItemBased(itemBase);
     	recommenderSystem.setNeighborsQuantity(neighborsQ);
     	recommenderSystem.setRecommendationMethod(similarityM);
     	recommenderSystem.setTrainingPercent(trainingPercentP);
+    	Recommendation[] recomendaciones = recommenderSystem.getUserRecommendation(userI, 10);
     	
-    	*/
+    	
 		return redirect(routes.Application.index());
     	
     }

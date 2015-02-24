@@ -78,6 +78,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 		if (!evaluationUpdated) {
 			updateModelEvaluation();
 		}
+		System.out.println("Statistics from Model: "+statisticsModel.averageDistance+" "+statisticsModel.maxDistance+" "+statisticsModel.minDistance+" "+statisticsModel.standardDeviation+" ");
 		return statisticsModel;
 	}
 
@@ -101,10 +102,9 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 						PreferenceArray prefsOrig = dataModel
 								.getPreferencesFromUser(u.getId());
 						long[] prefIdsOrig = prefsOrig.getIDs();
-						//TODO esto no puede ser negativo, ojo en la resta
-						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIdsOrig.length
-								- prefIds.length
-								: 0];
+						//TODO esto no puede ser negativo, ojo en la resta, inverti las respuestas
+						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ?0 :  prefIdsOrig.length
+								- prefIds.length];
 						int j = 0;
 						for (int i = 0; i < prefIds.length
 								&& j < resultsModelList.length; i++) {
