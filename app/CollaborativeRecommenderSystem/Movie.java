@@ -105,7 +105,7 @@ public class Movie {
                 {
                 	//TODO esto se debe retirar, fireproof
                 	if(splited.length==3)
-                    movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]));
+                		movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]));
                 }
                 catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
                 {

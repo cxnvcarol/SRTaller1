@@ -1,6 +1,7 @@
 package CollaborativeRecommenderSystem;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.PlusAnonymousConcurrentUserDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
@@ -22,6 +23,7 @@ import play.Play;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -85,8 +87,12 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 		File tt = Play.application().getFile(RATINGS_TEST_PATH);
 		try {
 			DataModel dataModelTest = new FileDataModel(tt);
-			for (User u : User.getAll()) {
-				if (!u.isNewUser() && u.getRatings().size() > 0) {
+			System.out.println("Number of Users: "+dataModelTest.getNumUsers());
+			LongPrimitiveIterator iterator = dataModelTest.getUserIDs();
+			while(iterator.hasNext()){	
+				User u = User.find(iterator.next());
+			//for (User u : User.getAll()) {
+				if (!u.isNewUser() && u.getRatings().size() > 0)  {
 					if (dataModelTest.getPreferencesFromUser(u.getId()) != null) {
 						PreferenceArray prefs = dataModelTest
 								.getPreferencesFromUser(u.getId());
@@ -95,6 +101,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 						PreferenceArray prefsOrig = dataModel
 								.getPreferencesFromUser(u.getId());
 						long[] prefIdsOrig = prefsOrig.getIDs();
+						//TODO esto no puede ser negativo, ojo en la resta
 						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIdsOrig.length
 								- prefIds.length
 								: 0];
