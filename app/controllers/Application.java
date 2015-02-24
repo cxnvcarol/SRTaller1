@@ -1,17 +1,24 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 
 import CollaborativeRecommenderSystem.*;
 import play.data.Form;
+import play.libs.Json;
 import play.mvc.*;
+import scala.Array;
+import scala.collection.immutable.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import views.html.*;
 
 public class Application extends Controller {
-	public static final CollaborativeRecommenderSystem recommenderSystem=CollaborativeRecommenderSystem.getInstance();
+	//public static final CollaborativeRecommenderSystem recommenderSystem=CollaborativeRecommenderSystem.getInstance();
 	public static final int user = -1;
 
     public static Result index() {
@@ -40,7 +47,7 @@ public class Application extends Controller {
         return ok(index.render(averageDistance+"", standardDeviation+"", maxdistance+"", mindistance+""));
     }
     public static Result evaluate(){
-    	String evaluar = Form.form().get("evaluar");
+    	String evaluar = Form.form().bindFromRequest().get("evaluar");
     	if(evaluar!=null)
         	System.out.println("EVALUO!!!!");
     	else
@@ -91,18 +98,45 @@ public class Application extends Controller {
     
     public static Result table()
     {
-    	int maxNum = 10;
-    	ResultModel[] resultados = recommenderSystem.evaluateModelDetail();
-    	String[][] chart = new String[resultados.length][];
+    	//ResultModel[] resultados = recommenderSystem.evaluateModelDetail();
+    	ResultModel[] resultados = new ResultModel [ 0];
+    	ArrayList<ArrayList<String>> arr = new ArrayList<>();
+    	
+    	/**
+    	String[] items = new String[resultados.length];
+    	String[] usuarios = new String[resultados.length];
+    	String[] estimados = new String[resultados.length];
+    	String[] reales = new String[resultados.length];
+    	String[] distancias = new String[resultados.length];
     	//String[] renderedTable = new String[resultados.length];
+    	*/
     	
-    	
-    	TableResult resultsfortable;
-    	TableResult[] resultaditos = new TableResult[resultados.length];
+		ArrayList<String> procesando =  new ArrayList<>();
     	
     	for( int i = 0; i <resultados.length ; i++)
     	{
     		ResultModel modelo = resultados[i];
+    		
+    		procesando.add(modelo.itemId+"");
+    		procesando.add(modelo.userId+"");
+    		procesando.add(modelo.estimatedRating+"");
+    		procesando.add(modelo.realRating+"");
+    		procesando.add(modelo.distance+"");
+    		
+    		arr.add(procesando);
+        	//result.put("Registro"+i, modelo.itemId + " "+modelo.userId+ " "+modelo.estimatedRating +" "+modelo.realRating + " "+modelo.distance);
+        	/**result.put("userID"+i, modelo.userId);
+        	result.put("estimatedrating"+i, modelo.estimatedRating);
+        	result.put("realrating"+i, modelo.realRating);
+        	result.put("distance"+i, modelo.distance);*/
+
+    		/**
+    		items[i] = +"";
+    		usuarios[i] = modelo.userId+"";
+    		estimados[i] = modelo.estimatedRating+"";
+    		reales[i] = modelo.realRating+"";
+    		distancias[i] = modelo.distance+"";
+
     		resultsfortable = new TableResult();
     		resultsfortable.itemID = modelo.itemId+"";
     		resultsfortable.userID = modelo.userId+"";
@@ -112,26 +146,12 @@ public class Application extends Controller {
     		
     		resultaditos[i] = resultsfortable;
     		
-    		/**
-    		chart[i][0] = modelo.itemId+"";
-    		chart[i][1] = modelo.userId+"";
-    		chart[i][2] = modelo.estimatedRating+"";
-    		chart[i][3] = modelo.realRating+"";
-    		chart[i][4] = modelo.distance+"";
     		
     		renderedTable[i] = chart[i][0]+"    "+chart[i][1]+"    "+chart[i][2]+"    "+chart[i][3]+"    "+chart[i][4];
     		*/
     	}
     	
-		return ok(table.render(resultaditos));    	
-    }
-    public static class TableResult{
-    	public String itemID;
-    	public String userID;
-    	public String estimatedRating;
-    	public String realRating;
-    	public String distance;
-    	
+		return ok(table.render(arr));    	
     }
 
 }
