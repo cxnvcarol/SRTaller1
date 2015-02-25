@@ -52,7 +52,7 @@ public class Application extends Controller {
     	double maxdistance = 23;
     	double mindistance = 24;
     	*/
-        return ok(index.render(averageDistance+"", standardDeviation+"", maxdistance+"", mindistance+""));
+        return ok(index.render(averageDistance+"", standardDeviation+"", maxdistance+"", mindistance+"",estadisticas.resultsLength+""));
     }
     public static Result evaluate(){
     		

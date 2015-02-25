@@ -100,12 +100,15 @@ public class Movie {
             while((ln=br.readLine())!=null&&ln.length()>0)
             {
                 splited=ln.split(",");
-                System.out.println("Lenght: "+splited.length);
+                //System.out.println("Lenght: "+splited.length);
                 try
                 {
-                	//TODO esto se debe retirar, fireproof
                 	if(splited.length==3)
                 		movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]));
+                    else if(splited.length==2)
+                        movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],""));
+                    else if(splited.length==1)
+                        movies.add(new Movie(Integer.parseInt(splited[0]),"",""));
                 }
                 catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
                 {

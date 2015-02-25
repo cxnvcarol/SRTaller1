@@ -75,9 +75,12 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 
 	@Override
 	public StatisticsModel evaluateModel() {
+        System.out.println("params: "+itemBased+","+neighborsQuantity+","+trainingPercent);
+
 		if (!evaluationUpdated) {
 			updateModelEvaluation();
 		}
+        else updateModel();
 		System.out.println("Statistics from Model: "+statisticsModel.averageDistance+" "+statisticsModel.maxDistance+" "+statisticsModel.minDistance+" "+statisticsModel.standardDeviation+" ");
 		return statisticsModel;
 	}
@@ -102,29 +105,30 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 						PreferenceArray prefsOrig = dataModel
 								.getPreferencesFromUser(u.getId());
 						long[] prefIdsOrig = prefsOrig.getIDs();
-						//TODO esto no puede ser negativo, ojo en la resta, inverti las respuestas
-						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ?0 :  prefIdsOrig.length
-								- prefIds.length];
-						int j = 0;
-						for (int i = 0; i < prefIds.length
-								&& j < resultsModelList.length; i++) {
-							int isIt = Arrays.binarySearch(prefIdsOrig,
-									prefs.getItemID(0));
 
-							if (isIt < 0) {
-								double estimated = recommender
-										.estimatePreference(u.getId(),
-												prefs.getItemID(i));
-								resultsModelList[j] = new ResultModel(
-										u.getId(), prefs.getItemID(i),
-										prefs.getValue(i), estimated);
-								j++;
+						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIds.length
+								- prefIdsOrig.length:0];
+						int j = 0;
+						for (int i = 0; i < prefIds.length && j < resultsModelList.length; i++) {
+							int isIt = Arrays.binarySearch(prefIdsOrig,prefs.getItemID(0));
+
+							//if (isIt < 0) {
+                            {
+								double estimated = recommender.estimatePreference(u.getId(),prefs.getItemID(i));
+                                if(!Double.isNaN(estimated))
+                                {
+                                    System.out.println("resMod: "+u.getId()+" "+ prefs.getItemID(i)+" "+prefs.getValue(i)+" "+ estimated);
+                                    resultsModelList[j] = new ResultModel(u.getId(), prefs.getItemID(i),prefs.getValue(i), estimated);
+                                    j++;
+                                }
 							}
 						}
 						if (j != resultsModelList.length) {
 							System.err
 									.print("Sizes for evaluation arrays does not match for user id "
 											+ u.getId() + "...\n");
+                            ResultModel[] r2=Arrays.copyOf(resultsModelList,j);
+                            resultsModelList=r2;
 						}
 					}
 				}

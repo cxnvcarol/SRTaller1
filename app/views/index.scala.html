@@ -1,4 +1,4 @@
-@(averageDistance: String, standarDeviation: String, maxdistance : String, mindistance : String) 
+@(averageDistance: String, standarDeviation: String, maxdistance : String, mindistance : String, resultsLength:String)
 @main("Welcome to Play") {
 
 <div>
@@ -41,7 +41,7 @@
 						<td><input type="number" name="neighborsquantity" style="width:100%"></td>
 					</tr>
 					<tr>
-						<td>Porcentaje Entrenamientos:</td>
+						<td>Porcentaje de entrenamiento:</td>
 						<td><input type="number" name="trainingset" style="width:100%"></td>
 					</tr>
 					<tr>
@@ -84,7 +84,14 @@
 		<td>Distancia Minima:</td>
 		<td>@mindistance</td>
 	</tr>
+    <tr>
+        <td>Items comparados:</td>
+        <td>@resultsLength</td>
+    </tr>
 </table>
 </div>
+
+    <div>
+    </div>
 
 }
