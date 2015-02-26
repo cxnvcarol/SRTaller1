@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,12 @@ public class Application extends Controller {
 
     public static Result allmovies()
     {
-        return ok(toJson(Movie.find.all()));
+        try {
+            return ok(toJson(Movie.getAll()));
+        } catch (IOException e) {
+            //e.printStackTrace();
+            return ok(toJson(new ArrayList()));
+        }
     }
     public static Result ratings(Long userid)
     {

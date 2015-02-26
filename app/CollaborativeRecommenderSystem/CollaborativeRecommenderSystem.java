@@ -259,7 +259,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
                     PreferenceArray resulta = dataModel.getPreferencesFromUser(u.id);
                     u.updateRatings(resulta);
                 } catch (TasteException e) {
-                    e.printStackTrace();
+                    System.err.println("no user "+e.getMessage());
                 }
             }
         return u;
