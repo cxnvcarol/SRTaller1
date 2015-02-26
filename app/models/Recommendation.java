@@ -3,6 +3,7 @@ package models;
 import play.db.ebean.Model;
 
 import javax.persistence.Entity;
+import java.math.BigDecimal;
 
 /**
  * Created by carol on 19/02/15.
@@ -25,6 +26,10 @@ public class Recommendation extends Model{
     }
     public void setMovie(Movie movie) {
         this.movie = movie;
+    }
+
+    public String toString(){
+    	return "Te recomendamos: "+movie.name+",  rating predecido: "+new BigDecimal(predictedRating ).setScale(3, BigDecimal.ROUND_HALF_UP);
     }
 
 }
