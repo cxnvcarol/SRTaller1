@@ -34,6 +34,12 @@ public class Movie extends Model{
     public static Finder<Long,Movie> find = new Finder<Long,Movie>(
             Long.class, Movie.class
     );
+
+    @Override
+    public String toString() {
+        return name==null?"no name":name;
+    }
+
     public Movie(long idp) throws Exception {
         numRatings=0;
         averageRating=0;
@@ -94,6 +100,10 @@ public class Movie extends Model{
             if(varv.size()>0)
             {
                 allMovies=varv.toArray(new Movie[varv.size()]);
+                for (Movie m1:allMovies)
+                {
+                    System.out.println("movie "+m1.toString());
+                }
                 return allMovies;
             }
 
@@ -116,6 +126,7 @@ public class Movie extends Model{
                     toadd=new Movie(Integer.parseInt(splited[0]),"","");
 
                     toadd.save();
+                    System.out.println("saving movie... "+movies.size());
                     movies.add(toadd);
                 }
                 catch(NumberFormatException | ArrayIndexOutOfBoundsException e)

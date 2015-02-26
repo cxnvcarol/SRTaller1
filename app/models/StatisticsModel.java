@@ -1,6 +1,5 @@
 package models;
 
-import com.sun.org.glassfish.external.statistics.Statistic;
 import play.db.ebean.Model;
 
 import javax.persistence.Entity;
