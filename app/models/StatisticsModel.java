@@ -1,5 +1,6 @@
 package models;
 
+import com.sun.org.glassfish.external.statistics.Statistic;
 import play.db.ebean.Model;
 
 import javax.persistence.Entity;
@@ -16,6 +17,9 @@ public class StatisticsModel extends Model{
     public double standardDeviation;
     public double variance;
     public int resultsLength;
+    public static Finder<Long,StatisticsModel> find = new Finder<Long,StatisticsModel>(
+            Long.class, StatisticsModel.class
+    );
 
     public StatisticsModel(ResultModel[] results)
     {

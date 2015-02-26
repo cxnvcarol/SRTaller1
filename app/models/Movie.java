@@ -2,16 +2,20 @@ package models;
 
 import CollaborativeRecommenderSystem.CollaborativeRecommenderSystem;
 import play.Play;
-import play.db.ebean.Model;
+import play.db.ebean.*;
+import play.data.format.*;
+import play.data.validation.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
+
+import javax.persistence.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created by carol on 19/02/15.
@@ -26,6 +30,10 @@ public class Movie extends Model{
     public String name;
     public String categories;
     private static Movie[] allMovies;
+
+    public static Finder<Long,Movie> find = new Finder<Long,Movie>(
+            Long.class, Movie.class
+    );
     public Movie(long idp) throws Exception {
         numRatings=0;
         averageRating=0;
@@ -48,7 +56,7 @@ public class Movie extends Model{
         categories=categoriesP;
     }
 
-    public static Movie find(long movieId) {
+    public static Movie getMovie(long movieId) {
         try {
             return new Movie(movieId);
         } catch (Exception e) {
@@ -82,7 +90,14 @@ public class Movie extends Model{
         {
             System.out.print("Finding all movies...");
             ArrayList<Movie> movies=new ArrayList<Movie>();
+            List<Movie> varv = Movie.find.all();
+            if(varv.size()>0)
+            {
+                allMovies=varv.toArray(new Movie[varv.size()]);
+                return allMovies;
+            }
 
+            //if(Movie.getMovie() .all())
             BufferedReader br=new BufferedReader(new FileReader(Play.application().getFile(CollaborativeRecommenderSystem.MOVIES_PATH)));
             String ln;
             String[] splited;
@@ -92,12 +107,16 @@ public class Movie extends Model{
                 //System.out.println("Lenght: "+splited.length);
                 try
                 {
+                    Movie toadd = null;
                 	if(splited.length==3)
-                		movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]));
+                		toadd=new Movie(Integer.parseInt(splited[0]),splited[1],splited[2]);
                     else if(splited.length==2)
-                        movies.add(new Movie(Integer.parseInt(splited[0]),splited[1],""));
+                        toadd=new Movie(Integer.parseInt(splited[0]),splited[1],"");
                     else if(splited.length==1)
-                        movies.add(new Movie(Integer.parseInt(splited[0]),"",""));
+                    toadd=new Movie(Integer.parseInt(splited[0]),"","");
+
+                    toadd.save();
+                    movies.add(toadd);
                 }
                 catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
                 {

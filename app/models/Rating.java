@@ -9,16 +9,22 @@ import javax.persistence.Entity;
  */
 @Entity
 public class Rating extends Model{
-    
+
     public double rating;
     public Movie movie;
+    public static Finder<Long,Rating> find = new Finder<Long,Rating>(
+            Long.class, Rating.class
+    );
+
 
     public void setRating(double rating) {
         this.rating = rating;
     }
     public Rating(long movieP,double newRating)
     {
-        movie=Movie.find(movieP);
+        movie=Movie.getMovie(movieP);
         rating=newRating;
     }
+
+    //TODO Preload all ratings??
 }

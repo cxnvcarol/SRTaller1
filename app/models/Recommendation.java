@@ -9,9 +9,10 @@ public class Recommendation {
     public double predictedRating;
     public Movie movie;
 
+
     public Recommendation(long movieId,double r)
     {
-        movie=Movie.find(movieId);
+        movie=Movie.getMovie(movieId);
         setPredictedRating(r);
     }
     public void setPredictedRating(double predictedRating) {

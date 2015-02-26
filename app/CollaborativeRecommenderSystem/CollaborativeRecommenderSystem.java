@@ -94,7 +94,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			System.out.println("Number of Users: "+dataModelTest.getNumUsers());
 			LongPrimitiveIterator iterator = dataModelTest.getUserIDs();
 			while(iterator.hasNext()){	
-				User u = User.find(iterator.next());
+				User u = User.getUser(iterator.next());
 			//for (User u : User.getAll()) {
 				if (!u.isNewUser() && u.ratings.size() > 0)  {
 					if (dataModelTest.getPreferencesFromUser(u.id) != null) {
@@ -189,7 +189,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			User found = loadUser(userId);
 			if (found != null) {
 				if (found.isNewUser()) {
-					plusDataModel.setTempPrefs(found.preferenceArray,found.id);
+					plusDataModel.setTempPrefs(found.getPreferenceArray(),found.id);
 				}
 				List<RecommendedItem> recommendations = recommender.recommend(userId, numMax);
 				Recommendation[] returned = new Recommendation[recommendations.size()];
@@ -224,14 +224,14 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 
 	@Override
 	public User loadUser(long userId) {
-		return User.find(userId);
+		return User.getUser(userId);
 	}
 
 	@Override
 	public void rate(long userId, long itemId, double rating) {
-		User myus = User.find(userId);
+		User myus = User.getUser(userId);
 		if (myus != null) {
-			User u = User.find(userId);
+			User u = User.getUser(userId);
 			u.addRating(itemId, rating);
 			if (!u.isNewUser()) {
 				try {
