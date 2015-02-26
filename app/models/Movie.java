@@ -142,7 +142,6 @@ public class Movie extends Model{
                     e.printStackTrace();
                 }
             }
-            //TODO Load ratings and rate all movies
             allMovies=movies.toArray(new Movie[movies.size()]);
             br.close();
         }
