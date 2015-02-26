@@ -80,3 +80,6 @@ crashlytics-build.properties
 
 target/*
 data/*
+
+.classpath
+.project
