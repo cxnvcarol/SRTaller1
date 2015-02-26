@@ -15,7 +15,7 @@ import static play.libs.Json.toJson;
 
 public class Application extends Controller {
 	public static final CollaborativeRecommenderSystem recommenderSystem = CollaborativeRecommenderSystem.getInstance();
-	public static int user =-1;
+	public static long user =-1;
 
     public static Result allmovies()
     {
@@ -33,36 +33,63 @@ public class Application extends Controller {
     {
         return ok(userRecommendations.render(id));//user does not exist by default
     }
-    public static Result evaluate(){
-    		
-    	String userID = Form.form().bindFromRequest().get("userid");
-    	boolean itemBase = Boolean.parseBoolean(Form.form().bindFromRequest().get("modeltype"));
-    	String recommendationmethod = Form.form().bindFromRequest().get("similaritymethod");
-    	String neighbors = Form.form().bindFromRequest().get("neighborsquantity");
-    	String trainingP = Form.form().bindFromRequest().get("trainingset");
-    	
-    	System.out.println("Datos: \n Usuario:"+userID+"\n itemBased:"+itemBase+
-    			"\n recommendationMethod: "+recommendationmethod+
-    			"\n neighbors: "+neighbors+
-    			"\n training%: "+trainingP);
-    	
-    	int userI = Integer.parseInt(userID);
-    	int neighborsQ = Integer.parseInt(neighbors);
-    	int similarityM = Integer.parseInt(recommendationmethod);
-    	double trainingPercentP = (Double.parseDouble(trainingP))/100;
-    	
-    	user = userI;
-    	
-    	recommenderSystem.setItemBased(itemBase);
-    	recommenderSystem.setNeighborsQuantity(neighborsQ);
-    	recommenderSystem.setRecommendationMethod(similarityM);
-    	recommenderSystem.setTrainingPercent(trainingPercentP);
-    	List<Recommendation> recomendaciones = recommenderSystem.getUserRecommendation(userI, 10);
-    	
-    	
-		return redirect(routes.Application.index());
-    	
+
+    public static Result evaluate() {
+
+        String userID = Form.form().bindFromRequest().get("userid");
+        boolean itemBase = Boolean.parseBoolean(Form.form().bindFromRequest()
+                .get("modeltype"));
+        String recommendationmethod = Form.form().bindFromRequest()
+                .get("similaritymethod");
+        String neighbors = Form.form().bindFromRequest()
+                .get("neighborsquantity");
+        String trainingP = Form.form().bindFromRequest().get("trainingset");
+
+        System.out.println("Datos: \n Usuario:" + userID + "\n itemBased:"
+                + itemBase + "\n recommendationMethod: " + recommendationmethod
+                + "\n neighbors: " + neighbors + "\n training%: " + trainingP);
+
+        long userI = Long.parseLong(userID);
+        int neighborsQ = Integer.parseInt(neighbors);
+        int similarityM = Integer.parseInt(recommendationmethod);
+        double trainingPercentP = (Double.parseDouble(trainingP)) / 100;
+
+        user = userI;
+
+        recommenderSystem.setItemBased(itemBase);
+        recommenderSystem.setNeighborsQuantity(neighborsQ);
+        recommenderSystem.setRecommendationMethod(similarityM);
+        recommenderSystem.setTrainingPercent(trainingPercentP);
+
+        List<Recommendation> recomendaciones = recommenderSystem
+                .getUserRecommendation(userI, 10);
+        String recomendacionStr = "";
+        if (user != -1) {
+            recomendaciones = recommenderSystem.getUserRecommendation(user, 10);
+        }
+        for (int i = 0; i < recomendaciones.size(); i++) {
+            recomendacionStr += recomendaciones.get(i).toString() + "|";
+        }
+        System.out.println("Recomendaciones encontradas: "
+                + recomendaciones.size());
+        System.out.println(recomendacionStr);
+
+        StatisticsModel estadisticas = recommenderSystem.evaluateModel();
+        System.out.println("Estadisticas de evaluacion: "
+                + estadisticas.averageDistance + " " + estadisticas.maxDistance
+                + " " + estadisticas.minDistance + " "
+                + estadisticas.standardDeviation + " ");
+        double averageDistance = estadisticas.averageDistance;
+        double standardDeviation = estadisticas.standardDeviation;
+        double maxdistance = estadisticas.maxDistance;
+        double mindistance = estadisticas.minDistance;
+
+        return ok(index.render(averageDistance + "", standardDeviation + "",
+                maxdistance + "", mindistance + "", estadisticas.resultsLength
+                        + "", recomendacionStr));
+
     }
+
     public static Result getRecommendations(Long id) {
         //long userid=Long.parseLong(Form.form().bindFromRequest().get("userid"));
         List<Recommendation> recomendaciones = recommenderSystem.getUserRecommendation(id, 10);
@@ -164,62 +191,6 @@ public class Application extends Controller {
 		return ok(index.render(averageDistance + "", standardDeviation + "",
 				maxdistance + "", mindistance + "", estadisticas.resultsLength
 						+ "", recomendacionStr));
-	}
-
-	public static Result evaluate() {
-
-		String userID = Form.form().bindFromRequest().get("userid");
-		boolean itemBase = Boolean.parseBoolean(Form.form().bindFromRequest()
-				.get("modeltype"));
-		String recommendationmethod = Form.form().bindFromRequest()
-				.get("similaritymethod");
-		String neighbors = Form.form().bindFromRequest()
-				.get("neighborsquantity");
-		String trainingP = Form.form().bindFromRequest().get("trainingset");
-
-		System.out.println("Datos: \n Usuario:" + userID + "\n itemBased:"
-				+ itemBase + "\n recommendationMethod: " + recommendationmethod
-				+ "\n neighbors: " + neighbors + "\n training%: " + trainingP);
-
-		int userI = Integer.parseInt(userID);
-		int neighborsQ = Integer.parseInt(neighbors);
-		int similarityM = Integer.parseInt(recommendationmethod);
-		double trainingPercentP = (Double.parseDouble(trainingP)) / 100;
-
-		user = userI;
-
-		recommenderSystem.setItemBased(itemBase);
-		recommenderSystem.setNeighborsQuantity(neighborsQ);
-		recommenderSystem.setRecommendationMethod(similarityM);
-		recommenderSystem.setTrainingPercent(trainingPercentP);
-
-		Recommendation[] recomendaciones = recommenderSystem
-				.getUserRecommendation(userI, 10);
-		String recomendacionStr = "";
-		if (user != -1) {
-			recomendaciones = recommenderSystem.getUserRecommendation(user, 10);
-		}
-		for (int i = 0; i < recomendaciones.length; i++) {
-			recomendacionStr += recomendaciones[i].toString() + "|";
-		}
-		System.out.println("Recomendaciones encontradas: "
-				+ recomendaciones.length);
-		System.out.println(recomendacionStr);
-
-		StatisticsModel estadisticas = recommenderSystem.evaluateModel();
-		System.out.println("Estadisticas de evaluacion: "
-				+ estadisticas.averageDistance + " " + estadisticas.maxDistance
-				+ " " + estadisticas.minDistance + " "
-				+ estadisticas.standardDeviation + " ");
-		double averageDistance = estadisticas.averageDistance;
-		double standardDeviation = estadisticas.standardDeviation;
-		double maxdistance = estadisticas.maxDistance;
-		double mindistance = estadisticas.minDistance;
-
-		return ok(index.render(averageDistance + "", standardDeviation + "",
-				maxdistance + "", mindistance + "", estadisticas.resultsLength
-						+ "", recomendacionStr));
-
 	}
 
 	public static Result loadUser() {
