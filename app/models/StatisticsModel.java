@@ -1,9 +1,14 @@
 package models;
 
+import play.db.ebean.Model;
+
+import javax.persistence.Entity;
+
 /**
  * Created by carol on 19/02/15.
  */
-public class StatisticsModel {
+@Entity
+public class StatisticsModel extends Model{
 
     public double averageDistance;
     public double maxDistance;

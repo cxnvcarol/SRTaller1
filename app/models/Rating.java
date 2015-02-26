@@ -1,9 +1,15 @@
 package models;
 
+import play.db.ebean.Model;
+
+import javax.persistence.Entity;
+
 /**
  * Created by carol on 19/02/15.
  */
-public class Rating {
+@Entity
+public class Rating extends Model{
+    
     public double rating;
     public Movie movie;
 

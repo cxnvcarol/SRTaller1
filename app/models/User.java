@@ -26,8 +26,19 @@ public class User extends Model{
 	private static ArrayList<User> allUsers;
 
 	public static long lastUser = 0;
+
+    public PreferenceArray getPreferenceArray() {
+        if(preferenceArray==null)
+        {
+            if (isNewUser) {
+                preferenceArray = new GenericUserPreferenceArray(30);
+            }
+        }
+        return preferenceArray;
+    }
+
     @Transient
-	public PreferenceArray preferenceArray;
+	private PreferenceArray preferenceArray;
     private boolean isNewUser;
 
 	public boolean isNewUser() {
@@ -112,6 +123,8 @@ public class User extends Model{
 	 * @param rating
 	 */
 	public void addRating(long movieId, double rating) {
+        if(isNewUser)
+            getPreferenceArray();
 		Rating rat;
 		for (int i = 0; i < ratings.size(); i++) {
 			rat = ratings.get(i);
