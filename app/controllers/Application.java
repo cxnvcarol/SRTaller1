@@ -1,19 +1,14 @@
 package controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.mahout.cf.taste.common.TasteException;
+import models.Recommendation;
+import models.ResultModel;
+import models.StatisticsModel;
 
 import CollaborativeRecommenderSystem.*;
 import play.data.Form;
-import play.libs.Json;
 import play.mvc.*;
-import scala.Array;
-import scala.collection.immutable.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import views.html.*;
 

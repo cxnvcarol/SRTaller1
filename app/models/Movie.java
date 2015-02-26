@@ -1,5 +1,6 @@
-package CollaborativeRecommenderSystem;
+package models;
 
+import CollaborativeRecommenderSystem.CollaborativeRecommenderSystem;
 import play.Play;
 
 import java.io.BufferedReader;

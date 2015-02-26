@@ -1,5 +1,6 @@
 package CollaborativeRecommenderSystem;
 
+import models.*;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.PlusAnonymousConcurrentUserDataModel;
@@ -23,7 +24,6 @@ import play.Play;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**

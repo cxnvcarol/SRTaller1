@@ -1,5 +1,10 @@
 package CollaborativeRecommenderSystem;
 
+import models.Recommendation;
+import models.ResultModel;
+import models.StatisticsModel;
+import models.User;
+
 /**
  * Created by carol on 19/02/15.
  */

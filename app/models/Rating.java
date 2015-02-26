@@ -1,4 +1,4 @@
-package CollaborativeRecommenderSystem;
+package models;
 
 /**
  * Created by carol on 19/02/15.

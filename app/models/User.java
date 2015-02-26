@@ -1,5 +1,6 @@
-package CollaborativeRecommenderSystem;
+package models;
 
+import CollaborativeRecommenderSystem.CollaborativeRecommenderSystem;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import play.Play;
@@ -59,8 +60,8 @@ public class User {
 			allUsers = new ArrayList<User>();
 			// lastUser=allUsers.length;
 			lastUser = CollaborativeRecommenderSystem.countLines(Play
-					.application().getFile(
-							CollaborativeRecommenderSystem.USERS_PATH));
+                    .application().getFile(
+                            CollaborativeRecommenderSystem.USERS_PATH));
 			for (int i = 0; i < lastUser; i++) {
 				// allUsers[i]=new User(i+1);
 				allUsers.add(new User(i + 1));
