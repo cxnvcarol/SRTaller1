@@ -2,7 +2,10 @@ package models;
 
 import CollaborativeRecommenderSystem.CollaborativeRecommenderSystem;
 import play.Play;
+import play.db.ebean.Model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,42 +16,27 @@ import java.util.Comparator;
 /**
  * Created by carol on 19/02/15.
  */
-public class Movie {
-    private long id;
+@Entity
+public class Movie extends Model{
 
-    public double getAverageRating() {
-        return averageRating;
-    }
-
-    private double averageRating;
-    private int numRatings;
-    public String getName() {
-        return name;
-    }
-
-    public String getCategories() {
-        return categories;
-    }
-
-    private String name;
-    private String categories;
+    @Id
+    public long id;
+    public double averageRating;
+    public int numRatings;
+    public String name;
+    public String categories;
     private static Movie[] allMovies;
-
-    public long getId()
-    {
-        return id;
-    }
     public Movie(long idp) throws Exception {
         numRatings=0;
         averageRating=0;
         Movie[] allm=getAll();
         for (Movie m:allm)
         {
-            if(m.getId()==idp)
+            if(m.id==idp)
             {
                 id=idp;
-                name=m.getName();
-                categories=m.getCategories();
+                name=m.name;
+                categories=m.categories;
                 return;
             }
         }

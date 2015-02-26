@@ -4,7 +4,11 @@ import CollaborativeRecommenderSystem.CollaborativeRecommenderSystem;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import play.Play;
+import play.db.ebean.Model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,19 +17,18 @@ import java.util.ArrayList;
 /**
  * Created by carol on 19/02/15.
  */
-public class User {
-	private long id;
-	private ArrayList<Rating> ratings;
+@Entity
+public class User extends Model{
 
+    @Id
+	public long id;
+	public ArrayList<Rating> ratings;
 	private static ArrayList<User> allUsers;
 
 	public static long lastUser = 0;
-
-	public PreferenceArray getPreferenceArray() {
-		return preferenceArray;
-	}
-
-	private PreferenceArray preferenceArray;
+    @Transient
+	public PreferenceArray preferenceArray;
+    private boolean isNewUser;
 
 	public boolean isNewUser() {
 		return isNewUser;
@@ -38,7 +41,6 @@ public class User {
 		}
 	}
 
-	private boolean isNewUser;
 
 	public User(long idp) {
 		id = idp;
@@ -94,7 +96,7 @@ public class User {
 		try {
 			User[] allm = getAll();
 			for (User m : allm) {
-				if (m.getId() == userId) {
+				if (m.id == userId) {
 					return m;
 				}
 			}
@@ -102,14 +104,6 @@ public class User {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public ArrayList<Rating> getRatings() {
-		return ratings;
 	}
 
 	/**
@@ -121,8 +115,8 @@ public class User {
 		Rating rat;
 		for (int i = 0; i < ratings.size(); i++) {
 			rat = ratings.get(i);
-			if(rat.getMovie()!=null){
-			if (rat.getMovie().getId() == movieId) {
+			if(rat.movie!=null){
+			if (rat.movie.id == movieId) {
 				rat.setRating(rating);
 				if (isNewUser) {
 					preferenceArray.setUserID(i, id);

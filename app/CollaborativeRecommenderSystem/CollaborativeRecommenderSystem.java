@@ -96,14 +96,14 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			while(iterator.hasNext()){	
 				User u = User.find(iterator.next());
 			//for (User u : User.getAll()) {
-				if (!u.isNewUser() && u.getRatings().size() > 0)  {
-					if (dataModelTest.getPreferencesFromUser(u.getId()) != null) {
+				if (!u.isNewUser() && u.ratings.size() > 0)  {
+					if (dataModelTest.getPreferencesFromUser(u.id) != null) {
 						PreferenceArray prefs = dataModelTest
-								.getPreferencesFromUser(u.getId());
+								.getPreferencesFromUser(u.id);
 						long[] prefIds = prefs.getIDs();
 
 						PreferenceArray prefsOrig = dataModel
-								.getPreferencesFromUser(u.getId());
+								.getPreferencesFromUser(u.id);
 						long[] prefIdsOrig = prefsOrig.getIDs();
 
 						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIds.length
@@ -114,11 +114,11 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 
 							//if (isIt < 0) {
                             {
-								double estimated = recommender.estimatePreference(u.getId(),prefs.getItemID(i));
+								double estimated = recommender.estimatePreference(u.id,prefs.getItemID(i));
                                 if(!Double.isNaN(estimated))
                                 {
-                                    System.out.println("resMod: "+u.getId()+" "+ prefs.getItemID(i)+" "+prefs.getValue(i)+" "+ estimated);
-                                    resultsModelList[j] = new ResultModel(u.getId(), prefs.getItemID(i),prefs.getValue(i), estimated);
+                                    System.out.println("resMod: "+u.id+" "+ prefs.getItemID(i)+" "+prefs.getValue(i)+" "+ estimated);
+                                    resultsModelList[j] = new ResultModel(u.id, prefs.getItemID(i),prefs.getValue(i), estimated);
                                     j++;
                                 }
 							}
@@ -126,7 +126,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 						if (j != resultsModelList.length) {
 							System.err
 									.print("Sizes for evaluation arrays does not match for user id "
-											+ u.getId() + "...\n");
+											+ u.id + "...\n");
                             ResultModel[] r2=Arrays.copyOf(resultsModelList,j);
                             resultsModelList=r2;
 						}
@@ -189,19 +189,14 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			User found = loadUser(userId);
 			if (found != null) {
 				if (found.isNewUser()) {
-					plusDataModel.setTempPrefs(found.getPreferenceArray(),
-							found.getId());
+					plusDataModel.setTempPrefs(found.preferenceArray,found.id);
 				}
-				List<RecommendedItem> recommendations = recommender.recommend(
-						userId, numMax);
-				Recommendation[] returned = new Recommendation[recommendations
-						.size()];
+				List<RecommendedItem> recommendations = recommender.recommend(userId, numMax);
+				Recommendation[] returned = new Recommendation[recommendations.size()];
 
 				for (int i = 0; i < recommendations.size(); i++) {
 					RecommendedItem recommendation = recommendations.get(i);
-					returned[i] = new Recommendation(
-							recommendation.getItemID(),
-							recommendation.getValue());
+					returned[i] = new Recommendation(recommendation.getItemID(),recommendation.getValue());
 				}
 				return returned;
 			}
@@ -218,8 +213,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			int nmovs = (nmovies < top.length ? nmovies : top.length);
 			Recommendation[] result = new Recommendation[nmovs];
 			for (int i = 0; i < nmovs; i++) {
-				result[i] = new Recommendation(top[i].getId(),
-						top[i].getAverageRating());
+				result[i] = new Recommendation(top[i].id,top[i].averageRating);
 			}
 			return result;
 		} catch (IOException e) {
@@ -301,7 +295,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			BufferedReader br = new BufferedReader(new FileReader(src));
 			String parentPath = src.getParentFile().getAbsolutePath();
 
-			File trainingFile = new File(parentPath + "/ratingsTrainig.csv");
+			File trainingFile = new File(parentPath + "/ratingsTraining.csv");
 			FileWriter fw = new FileWriter(trainingFile.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			for (int i = 0; i < lnTraining; i++) {
@@ -317,9 +311,17 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			}
 			bw.close();
 			br.close();
+            File tt;
+            try{
+                tt = Play.application().getFile(RATINGS_TRAINING_PATH);
+                dataModel = new FileDataModel(tt);
+            }
+            catch(FileNotFoundException exc)
+            {
 
-			File tt = Play.application().getFile(RATINGS_TRAINING_PATH);
-			dataModel = new FileDataModel(tt);
+            }
+
+
 			plusDataModel = new PlusAnonymousConcurrentUserDataModel(dataModel,
 					100);
 

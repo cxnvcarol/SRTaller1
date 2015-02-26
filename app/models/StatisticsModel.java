@@ -41,6 +41,7 @@ public class StatisticsModel {
             double partial = dist > averageDistance ? dist - averageDistance : averageDistance - dist;
             variance += partial * partial;
         }
+        variance=variance/resultsLength;
         standardDeviation=Math.sqrt(variance);
     }
 }
