@@ -230,6 +230,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 		} catch (TasteException e) {
             System.err.println("User wasn't found");
             //TODO Return popularests
+            System.out.println("TasteException: No encontramos recomendaciones");
 			return new ArrayList<Recommendation>();
 		}
 	}
@@ -253,10 +254,12 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 	public User loadUser(long userId) {
 		User u=User.getUser(userId);
         if(u!=null)
-            if(!u.ratingsModel&&!u.isNewUser())
+            if(!u.ratingsModel && !u.isNewUser())
             {
                 try {
+            		//TODO no esta encontrando las preferencias del usuarios
                     PreferenceArray resulta = dataModel.getPreferencesFromUser(u.id);
+                    System.out.println("Preferencias encontradas");
                     u.updateRatings(resulta);
                 } catch (TasteException e) {
                     System.err.println("no user "+e.getMessage());
