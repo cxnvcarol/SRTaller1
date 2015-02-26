@@ -23,6 +23,8 @@ public class User extends Model{
 
     @Id
 	public long id;
+
+    @Transient
 	public ArrayList<Rating> ratings;
 	private static List<User> allUsers;
 
@@ -31,6 +33,7 @@ public class User extends Model{
     public static Finder<Long,User> find = new Finder<Long,User>(
             Long.class, User.class
     );
+    public boolean ratingsModel;
 
     public PreferenceArray getPreferenceArray() {
         if(preferenceArray==null)
@@ -62,6 +65,7 @@ public class User extends Model{
 		id = idp;
 		ratings = new ArrayList<Rating>();
 		isNewUser = false;
+        ratingsModel=false;
 	}
 
 	public static void addUser(User u) {
@@ -79,9 +83,9 @@ public class User extends Model{
             if(varv.size()>0)
             {
                 allUsers=varv;
+                //for(User uu:allUsers)
                 return allUsers.toArray(new User[allUsers.size()]);
             }
-			System.out.print("Finding all movies...");
 			// allUsers=new
 			// User[CollaborativeRecommenderSystem.countLines(Play.application().getFile(USERS_PATH))];
 			allUsers = new ArrayList<User>();
@@ -92,27 +96,9 @@ public class User extends Model{
 			for (int i = 0; i < lastUser; i++) {
 				// allUsers[i]=new User(i+1);
                 User u=new User(i + 1);
-                u.save();
+                //u.save();//TODO
 				allUsers.add(u);
 			}
-			BufferedReader br = new BufferedReader(
-					new FileReader(
-							Play.application()
-									.getFile(
-											CollaborativeRecommenderSystem.RATINGS_TRAINING_PATH)));
-			String lin;
-			while ((lin = br.readLine()) != null && lin.length() > 0) {
-				String[] spl = lin.split(",");
-				// could be more efficient?
-				int movieid = Integer.parseInt(spl[1]);
-				if (spl[2] != null) {
-					double rr = Double.parseDouble(spl[2]);
-					User.getUser(Integer.parseInt(spl[0])).addRating(movieid, rr);
-					if(Movie.getMovie(movieid)!=null)
-						Movie.getMovie(movieid).addRating(rr);
-				}
-			}
-			br.close();
 		}
 		return allUsers.toArray(new User[(int) lastUser]);
 
@@ -152,7 +138,7 @@ public class User extends Model{
 					preferenceArray.setItemID(i, movieId);
 					preferenceArray.setValue(i, (float) rating);
 				}
-				break;
+				return;
 			}
 			}
 		}
@@ -161,7 +147,15 @@ public class User extends Model{
 			preferenceArray.setItemID(ratings.size(), movieId);
 			preferenceArray.setValue(ratings.size(), (float) rating);
 		}
-		ratings.add(new Rating(movieId, rating));
+		ratings.add(new Rating(movieId, rating));//to get later in view
 	}
 
+    public void updateRatings(PreferenceArray pa)
+    {
+        ratingsModel=true;
+        int ratids = pa.getIDs().length;
+        for (int i = 0; i < ratids; i++) {
+            addRating(pa.getItemID(i),pa.getValue(i));
+        }
+    }
 }

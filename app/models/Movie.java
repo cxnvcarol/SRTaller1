@@ -64,7 +64,13 @@ public class Movie extends Model{
 
     public static Movie getMovie(long movieId) {
         try {
-            return new Movie(movieId);
+            Movie[] allm = getAll();
+            for (Movie m : allm) {
+                if (m.id == movieId) {
+                    return m;
+                }
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }
@@ -96,6 +102,7 @@ public class Movie extends Model{
         {
             System.out.print("Finding all movies...");
             ArrayList<Movie> movies=new ArrayList<Movie>();
+            /*//TODO
             List<Movie> varv = Movie.find.all();
             if(varv.size()>0)
             {
@@ -106,6 +113,7 @@ public class Movie extends Model{
                 }
                 return allMovies;
             }
+            */
 
             //if(Movie.getMovie() .all())
             BufferedReader br=new BufferedReader(new FileReader(Play.application().getFile(CollaborativeRecommenderSystem.MOVIES_PATH)));
@@ -125,7 +133,7 @@ public class Movie extends Model{
                     else if(splited.length==1)
                     toadd=new Movie(Integer.parseInt(splited[0]),"","");
 
-                    toadd.save();
+                    //toadd.save();//TODO
                     System.out.println("saving movie... "+movies.size());
                     movies.add(toadd);
                 }
@@ -134,6 +142,7 @@ public class Movie extends Model{
                     e.printStackTrace();
                 }
             }
+            //TODO Load ratings and rate all movies
             allMovies=movies.toArray(new Movie[movies.size()]);
             br.close();
         }

@@ -1,9 +1,14 @@
 package models;
 
+import play.db.ebean.Model;
+
+import javax.persistence.Entity;
+
 /**
  * Created by carol on 19/02/15.
  */
-public class Recommendation {
+@Entity
+public class Recommendation extends Model{
 
 
     public double predictedRating;

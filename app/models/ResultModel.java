@@ -1,11 +1,15 @@
 package models;
 
 
+import play.db.ebean.Model;
+
+import javax.persistence.Entity;
 
 /**
  * Created by carol on 19/02/15.
  */
-public class ResultModel{
+@Entity
+public class ResultModel extends Model{
     public double distance;
     public double estimatedRating;
     public double realRating;

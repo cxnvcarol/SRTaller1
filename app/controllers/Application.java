@@ -1,16 +1,17 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import models.Recommendation;
-import models.ResultModel;
-import models.StatisticsModel;
+import models.*;
 
 import CollaborativeRecommenderSystem.*;
 import play.data.Form;
 import play.mvc.*;
 
 import views.html.*;
+
+import static play.libs.Json.toJson;
 
 public class Application extends Controller {
 	public static final CollaborativeRecommenderSystem recommenderSystem = CollaborativeRecommenderSystem.getInstance();
@@ -35,7 +36,7 @@ public class Application extends Controller {
     	double maxdistance = estadisticas.maxDistance;
     	double mindistance = estadisticas.minDistance;
     	
-    	Recommendation[] recomendaciones =  new Recommendation[0];
+    	List<Recommendation> recomendaciones =  new ArrayList<Recommendation>();
     	if(user!= -1)
     	{
     		recomendaciones = recommenderSystem.getUserRecommendation(user, 10);
@@ -48,6 +49,23 @@ public class Application extends Controller {
     	double mindistance = 24;
     	*/
         return ok(index.render(averageDistance+"", standardDeviation+"", maxdistance+"", mindistance+"",estadisticas.resultsLength+""));
+    }
+
+    public static Result allmovies()
+    {
+        return ok(toJson(Movie.find.all()));
+    }
+    public static Result ratings(Long userid)
+    {
+        User u=recommenderSystem.loadUser(userid);
+        if(u!=null)
+            return ok(toJson(u.ratings));
+        else return ok(toJson(new ArrayList()));
+
+    }
+    public static Result userZone(Long id)
+    {
+        return ok(userRecommendations.render(id));//user does not exist by default
     }
     public static Result evaluate(){
     		
@@ -73,13 +91,24 @@ public class Application extends Controller {
     	recommenderSystem.setNeighborsQuantity(neighborsQ);
     	recommenderSystem.setRecommendationMethod(similarityM);
     	recommenderSystem.setTrainingPercent(trainingPercentP);
-    	Recommendation[] recomendaciones = recommenderSystem.getUserRecommendation(userI, 10);
+    	List<Recommendation> recomendaciones = recommenderSystem.getUserRecommendation(userI, 10);
     	
     	
 		return redirect(routes.Application.index());
     	
     }
-    
+    public static Result getRecommendations(Long id) {
+        //long userid=Long.parseLong(Form.form().bindFromRequest().get("userid"));
+        List<Recommendation> recomendaciones = recommenderSystem.getUserRecommendation(id, 10);
+        return ok(toJson(recomendaciones));
+    }
+    public static Result rate() {
+        long usid=Long.parseLong(Form.form().bindFromRequest().get("userid"));
+        double rating=Double.parseDouble(Form.form().bindFromRequest().get("new_rating"));
+        long movid=Long.parseLong(Form.form().bindFromRequest().get("movieid"));
+        return(ok());
+
+    }
     public static Result loadUser(){
     	/**
     	String userID = Form.form().get("userid");

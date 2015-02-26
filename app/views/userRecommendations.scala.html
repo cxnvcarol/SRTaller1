@@ -1,97 +1,46 @@
-@(averageDistance: String, standarDeviation: String, maxdistance : String, mindistance : String, resultsLength:String)
-@main("Welcome to Play") {
+@(userid:Long)
+@main("User recommendation") {
 
+    <h1>¿Qué películas deberías ver?</h1>
+    <input type="hidden" name="userid" id="userid_global" value="@userid"/>
 <div>
-	<table width="100%" border="0">
-		<form  action = "@routes.Application.evaluate()" method="post">
-		<tr>
-			<td width="35%">
-				<table width="100%" border="0">
-					<tr>
-						<p>
-							<strong>EVALUACION DEL MODELO</strong>
-						</p>
-					</tr>
-					<tr>
-						<td>ID de Usuario:</td>
-						<td><input type="text" name="userid" style="width:100%"></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td align="right"><button style="width: 50%" align="center">Buscar</button>
-						<button style="width: 50%" align="center" formaction="loaduser">Crear</button></td>
-					</tr>
-					<tr>
-						<td>Tipo de Modelo:</td>
-						<td><select name="modeltype" style="width:100%">
-								<option value="true">Item Based</option>
-								<option value="false">User Based</option>
-						</select></td>
-					</tr>
-					<tr>
-						<td>Metodo de Recomendacion:</td>
-						<td><select name="similaritymethod" style="width:100%">
-								<option value="1">Jacqard</option>
-								<option value="2">Coseno</option>
-								<option value="3">Pearson</option>
-						</select></td>
-					</tr>
-					<tr>
-						<td>Cantidad de Vecinos:</td>
-						<td><input type="number" name="neighborsquantity" style="width:100%"></td>
-					</tr>
-					<tr>
-						<td>Porcentaje de entrenamiento:</td>
-						<td><input type="number" name="trainingset" style="width:100%"></td>
-					</tr>
-					<tr>
-						<td>&nbsp;</td>
-						<td><button type="submit" style="width: 100%" >Evaluar</button>
-						</td>
-					</tr>
-				</table>
-				</form>
-			</td>
-			<td width="35%" align="left" valign="top">
-				<p>
-					<strong>TUS RECOMENDACIONES:</strong>
-				</p>
-				<p id="listarecomendaciones"></p>
-			</td>
-		</tr>
-		<td></td>
-	</table>
+
+    <h2> ¿Quién eres?</h2>
+		<form  action = "" method="post">
+            <label for="userid1">User id</label>
+            <input type="number" name="userid" id="userid1" value="@userid"/>
+            <input type="checkbox" name="newuser" id="newuser"/><label for="newuser">New user?</label>
+            <br/>
+            <button id="udpate">Update user</button>
+		</form>
+
+    <div id="ratings" style="clear: both">
+        <h2>Tus calificaciones</h2>
+        <ul id="ratingsList">
+
+        </ul>
+
+        <div id="calificar" style="clear: both">
+            <form action="@routes.Application.rate()" method="post">
+                <select id="allmovies" name="movie_id"></select>
+                <label for="new_rating">Calificación:</label>
+                <br/>
+                <input type="number" id="new_rating" name="new_rating"/>
+
+                <button>Calificar</button>
+            </form>
+        </div>
+    </div>
 </div>
 <div>
-<p>&nbsp;</p>
-<p>
-	<strong>ESTADISTICAS</strong>
-</p>
-<table width="400" border="0">
-	<tr>
-		<td>Distancia Promedio:</td>
-		<td>@averageDistance</td>
-	</tr>
-	<tr>
-		<td>Desviacion Estandar:</td>
-		<td>@standarDeviation</td>
-	</tr>
-	<tr>
-		<td>Distancia Maxima:</td>
-		<td>@maxdistance</td>
-	</tr>
-	<tr>
-		<td>Distancia Minima:</td>
-		<td>@mindistance</td>
-	</tr>
-    <tr>
-        <td>Items comparados:</td>
-        <td>@resultsLength</td>
-    </tr>
-</table>
 </div>
+    <br/>
+    <div id="tusrecomendaciones">
+        <script type="text/javascript" src='@routes.Assets.at("js/userzone.js")'></script>
+        <h2>Tus recomendaciones</h2>
 
-    <div>
+        <ul id="recs">
+        </ul>
     </div>
 
 }

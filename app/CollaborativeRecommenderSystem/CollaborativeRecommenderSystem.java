@@ -23,6 +23,7 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import play.Play;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 
 	private static final String RATINGS_PATH = "data/ratings.csv";
 	public static final String RATINGS_TRAINING_PATH = "data/ratingsTraining.csv";
-	private static final String RATINGS_TEST_PATH = "data/ratingsTest.csv";
+	//private static final String RATINGS_TEST_PATH = "data/ratingsTest.csv";
 	public static final String USERS_PATH = "data/users.csv";
 	public static final String MOVIES_PATH = "data/movies.csv";
 	private static CollaborativeRecommenderSystem sInstance = null;
@@ -77,71 +78,98 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 	public StatisticsModel evaluateModel() {
         System.out.println("params: "+itemBased+","+neighborsQuantity+","+trainingPercent);
 
-		if (!evaluationUpdated) {
 			updateModelEvaluation();
-		}
-        else updateModel();
 		System.out.println("Statistics from Model: "+statisticsModel.averageDistance+" "+statisticsModel.maxDistance+" "+statisticsModel.minDistance+" "+statisticsModel.standardDeviation+" ");
 		return statisticsModel;
 	}
 
 	private void updateModelEvaluation() {
+        StatisticsModel smtemp=StatisticsModel.findDescription(getDescription());
+        if(smtemp!=null)
+        {
+            statisticsModel=smtemp;
+            return;
+        }
 		updateModel();
+        List<ResultModel> rmlist=new ArrayList<ResultModel>();
 
-		File tt = Play.application().getFile(RATINGS_TEST_PATH);
+		File tt = Play.application().getFile(RATINGS_PATH);
 		try {
 			DataModel dataModelTest = new FileDataModel(tt);
 			System.out.println("Number of Users: "+dataModelTest.getNumUsers());
 			LongPrimitiveIterator iterator = dataModelTest.getUserIDs();
-			while(iterator.hasNext()){	
-				User u = User.getUser(iterator.next());
+
+            int numnotfounds=0;
+			while(iterator.hasNext()){
+                List<ResultModel> rmtemp=new ArrayList<ResultModel>();
+                long uid=iterator.nextLong();
+				//User u = User.getUser(iterator.next());
+
+
 			//for (User u : User.getAll()) {
-				if (!u.isNewUser() && u.ratings.size() > 0)  {
-					if (dataModelTest.getPreferencesFromUser(u.id) != null) {
-						PreferenceArray prefs = dataModelTest
-								.getPreferencesFromUser(u.id);
-						long[] prefIds = prefs.getIDs();
+				//if (!u.isNewUser()){
+                {
+                    try{
+					if (dataModelTest.getPreferencesFromUser(uid) != null) {
+                        PreferenceArray prefs = dataModelTest
+                                .getPreferencesFromUser(uid);
+                        long[] prefIds = prefs.getIDs();
 
-						PreferenceArray prefsOrig = dataModel
-								.getPreferencesFromUser(u.id);
-						long[] prefIdsOrig = prefsOrig.getIDs();
+                        PreferenceArray prefsOrig = dataModel
+                                .getPreferencesFromUser(uid);
+                        long[] prefIdsOrig = prefsOrig.getIDs();
+                        //rmtemp = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIds.length- prefIdsOrig.length : 0];
+                        int tamtosave=prefIds.length > prefIdsOrig.length ? prefIds.length- prefIdsOrig.length : 0;
+                        int j = 0;
+                        int i=0;
+                        for (i = 0; i < prefIds.length && j < tamtosave; i++) {
+                            int isIt = Arrays.binarySearch(prefIdsOrig, prefs.getItemID(i));
 
-						resultsModelList = new ResultModel[prefIds.length > prefIdsOrig.length ? prefIds.length
-								- prefIdsOrig.length:0];
-						int j = 0;
-						for (int i = 0; i < prefIds.length && j < resultsModelList.length; i++) {
-							int isIt = Arrays.binarySearch(prefIdsOrig,prefs.getItemID(0));
-
-							//if (isIt < 0) {
+                            if (isIt < 0)
                             {
-								double estimated = recommender.estimatePreference(u.id,prefs.getItemID(i));
-                                if(!Double.isNaN(estimated))
-                                {
-                                    System.out.println("resMod: "+u.id+" "+ prefs.getItemID(i)+" "+prefs.getValue(i)+" "+ estimated);
-                                    resultsModelList[j] = new ResultModel(u.id, prefs.getItemID(i),prefs.getValue(i), estimated);
+                                double estimated = recommender.estimatePreference(uid, prefs.getItemID(i));
+                                if (!Double.isNaN(estimated)) {
+                                    System.out.println("resModel: " + uid + " " + prefs.getItemID(i) + " " + prefs.getValue(i) + " " + estimated);
+                                    rmtemp.add(new ResultModel(uid, prefs.getItemID(i), prefs.getValue(i), estimated));
                                     j++;
                                 }
-							}
-						}
-						if (j != resultsModelList.length) {
-							System.err
-									.print("Sizes for evaluation arrays does not match for user id "
-											+ u.id + "...\n");
-                            ResultModel[] r2=Arrays.copyOf(resultsModelList,j);
-                            resultsModelList=r2;
-						}
-					}
-				}
-			}
+                            }
+                        }
+                        if (j != i) {
+                            System.err
+                                    .print("Couldn't estimate all for user "
+                                            + uid + ", diff:"+(i-j)+"...\n");
+                        }
 
-		} catch (IOException | TasteException e) {
+					}
+                    }
+                    catch(TasteException ex)
+                    {
+                        System.err.println(ex.getMessage());
+                        numnotfounds++;
+
+                    }
+				}
+                rmlist.addAll(rmtemp);
+			}
+            System.out.println(numnotfounds+" users without ratings");
+
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		statisticsModel = new StatisticsModel(resultsModelList);
+		} catch (TasteException e) {
+            e.printStackTrace();
+        }
+        resultsModelList=rmlist.toArray(new ResultModel[rmlist.size()]);
+        statisticsModel = new StatisticsModel(resultsModelList,getDescription());
+        statisticsModel.save();
 		evaluationUpdated = true;
 	}
 
-	private void updateModel() {
+    private String getDescription() {
+        return "ib:"+itemBased+",sm:"+similarityMethod+",tp:"+trainingPercent+",nq:"+neighborsQuantity;
+    }
+
+    private void updateModel() {
 		try {
 			ItemSimilarity similarity = null;
 			switch (similarityMethod) {
@@ -174,14 +202,12 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 
 	@Override
 	public ResultModel[] evaluateModelDetail() {
-		if (!evaluationUpdated) {
 			updateModelEvaluation();
-		}
 		return resultsModelList;
 	}
 
 	@Override
-	public Recommendation[] getUserRecommendation(int userId, int numMax) {
+	public List<Recommendation> getUserRecommendation(long userId, int numMax) {
 		if (!modelUpdated) {
 			updateModel();
 		}
@@ -192,39 +218,51 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 					plusDataModel.setTempPrefs(found.getPreferenceArray(),found.id);
 				}
 				List<RecommendedItem> recommendations = recommender.recommend(userId, numMax);
-				Recommendation[] returned = new Recommendation[recommendations.size()];
+				List<Recommendation> returned = new ArrayList<Recommendation>();
 
 				for (int i = 0; i < recommendations.size(); i++) {
 					RecommendedItem recommendation = recommendations.get(i);
-					returned[i] = new Recommendation(recommendation.getItemID(),recommendation.getValue());
+					returned.add(new Recommendation(recommendation.getItemID(),recommendation.getValue()));
 				}
 				return returned;
 			}
 			return findBetterMovies(numMax);
 		} catch (TasteException e) {
-			e.printStackTrace();
-			return new Recommendation[0];
+            System.err.println("User wasn't found");
+            //TODO Return popularests
+			return new ArrayList<Recommendation>();
 		}
 	}
 
-	private Recommendation[] findBetterMovies(int nmovies) {
+	private List<Recommendation> findBetterMovies(int nmovies) {
 		try {
 			Movie[] top = Movie.getOrderedByRating();
 			int nmovs = (nmovies < top.length ? nmovies : top.length);
-			Recommendation[] result = new Recommendation[nmovs];
+            List<Recommendation> result = new ArrayList<Recommendation>();
 			for (int i = 0; i < nmovs; i++) {
-				result[i] = new Recommendation(top[i].id,top[i].averageRating);
+				result.add(new Recommendation(top[i].id,top[i].averageRating));
 			}
 			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return new Recommendation[0];
+			return new ArrayList<Recommendation>();
 		}
 	}
 
 	@Override
 	public User loadUser(long userId) {
-		return User.getUser(userId);
+		User u=User.getUser(userId);
+        if(u!=null)
+            if(!u.ratingsModel&&!u.isNewUser())
+            {
+                try {
+                    PreferenceArray resulta = dataModel.getPreferencesFromUser(u.id);
+                    u.updateRatings(resulta);
+                } catch (TasteException e) {
+                    e.printStackTrace();
+                }
+            }
+        return u;
 	}
 
 	@Override
@@ -290,6 +328,7 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 		try {
 			File src = Play.application().getFile(RATINGS_PATH);
 			int totalLines = countLines(src);
+            int inverseP=(int)(1/trainingPercent);
 			int lnTraining = (int) (totalLines * trainingPercent);
 
 			BufferedReader br = new BufferedReader(new FileReader(src));
@@ -298,22 +337,27 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 			File trainingFile = new File(parentPath + "/ratingsTraining.csv");
 			FileWriter fw = new FileWriter(trainingFile.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
-			for (int i = 0; i < lnTraining; i++) {
-				bw.write(br.readLine() + "\n");
+            int tot=0;
+			for (int i = 0; tot < lnTraining&&i<totalLines; i++) {
+                String line=br.readLine();
+                if(i%inverseP==0)//print every m lines
+				    bw.write(line+ "\n");
 			}
 			bw.close();
 
-			File testFile = new File(parentPath + "/ratingsTest.csv");
-			fw = new FileWriter(testFile.getAbsoluteFile());
-			bw = new BufferedWriter(fw);
-			for (int i = lnTraining; i < totalLines; i++) {
-				bw.write(br.readLine() + "\n");
-			}
-			bw.close();
-			br.close();
             File tt;
             try{
                 tt = Play.application().getFile(RATINGS_TRAINING_PATH);
+                /*
+                DataSource ds= DB.getDataSource();
+                try {
+                    ds.getConnection();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                */
+
+                //dataModel=new MySQLJDBCDataModel(ds,"rating","userid","movieid","rating","timestamp");
                 dataModel = new FileDataModel(tt);
             }
             catch(FileNotFoundException exc)
@@ -331,7 +375,21 @@ public class CollaborativeRecommenderSystem implements RecommenderSystem {
 		try {
 			Movie.getAll();
 			User.getAll();
-		} catch (IOException e) {
+            try {
+                LongPrimitiveIterator allprefs=dataModel.getUserIDs();
+                while(allprefs.hasNext())
+                {
+                    long usid=allprefs.nextLong();
+                    PreferenceArray pa=dataModel.getPreferencesFromUser(usid);
+                    User u=User.getUser(usid);
+                    for (int i = 0; i < pa.length(); i++) {
+                        u.addRating(pa.getItemID(i),pa.getValue(i));
+                    }
+                }
+            } catch (TasteException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
 			e.printStackTrace();
 		}
 		updateModel();

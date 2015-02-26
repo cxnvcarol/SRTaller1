@@ -3,6 +3,7 @@ package models;
 import play.db.ebean.Model;
 
 import javax.persistence.Entity;
+import java.util.List;
 
 /**
  * Created by carol on 19/02/15.
@@ -16,12 +17,25 @@ public class StatisticsModel extends Model{
     public double standardDeviation;
     public double variance;
     public int resultsLength;
+    public String description;
     public static Finder<Long,StatisticsModel> find = new Finder<Long,StatisticsModel>(
             Long.class, StatisticsModel.class
     );
 
-    public StatisticsModel(ResultModel[] results)
+    public StatisticsModel(ResultModel[] results, String desc)
     {
+        description=desc;
+        resultsLength =results.length;
+        averageDistance=0;
+        if(results.length==0)
+        {
+            maxDistance=0;
+            minDistance=0;
+            variance=0;
+            standardDeviation=0;
+            return;
+        }
+
         resultsLength =results.length;
         maxDistance=-1;
         minDistance=100000;
@@ -51,5 +65,15 @@ public class StatisticsModel extends Model{
         }
         variance=variance/resultsLength;
         standardDeviation=Math.sqrt(variance);
+    }
+
+    public static StatisticsModel findDescription(String descriptionP) {
+        List<StatisticsModel> allagain = StatisticsModel.find.all();
+        for (StatisticsModel sm:allagain)
+        {
+            if(sm.description.equals(descriptionP))
+                return sm;
+        }
+        return null;
     }
 }

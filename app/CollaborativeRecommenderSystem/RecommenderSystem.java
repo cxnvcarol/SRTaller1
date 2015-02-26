@@ -5,6 +5,8 @@ import models.ResultModel;
 import models.StatisticsModel;
 import models.User;
 
+import java.util.List;
+
 /**
  * Created by carol on 19/02/15.
  */
@@ -18,7 +20,7 @@ public interface RecommenderSystem {
 
     public StatisticsModel evaluateModel();
     public ResultModel[] evaluateModelDetail();
-    public Recommendation[] getUserRecommendation(int userId, int numMax);
+    public List<Recommendation> getUserRecommendation(long userId, int numMax);
     public User loadUser(long userId);
     public void rate(long userId, long itemId, double rating);
     public User registerUser();

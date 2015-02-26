@@ -12,7 +12,20 @@ create table movie (
 ;
 
 create table rating (
-  rating                    double)
+  rating                    double,
+  timestamp                 integer)
+;
+
+create table recommendation (
+  predicted_rating          double)
+;
+
+create table result_model (
+  distance                  double,
+  estimated_rating          double,
+  real_rating               double,
+  item_id                   integer,
+  user_id                   integer)
 ;
 
 create table statistics_model (
@@ -21,11 +34,13 @@ create table statistics_model (
   min_distance              double,
   standard_deviation        double,
   variance                  double,
-  results_length            integer)
+  results_length            integer,
+  description               varchar(255))
 ;
 
 create table user (
   id                        integer primary key AUTOINCREMENT,
+  ratings_model             integer(1),
   is_new_user               integer(1))
 ;
 
@@ -39,6 +54,10 @@ PRAGMA foreign_keys = OFF;
 drop table movie;
 
 drop table rating;
+
+drop table recommendation;
+
+drop table result_model;
 
 drop table statistics_model;
 
