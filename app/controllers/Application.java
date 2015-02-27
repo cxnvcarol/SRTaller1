@@ -76,6 +76,8 @@ public class Application extends Controller {
         for (int i = 0; i < recomendaciones.size(); i++) {
             recomendacionStr += recomendaciones.get(i).toString() + "|";
         }
+        if(recomendaciones.size()==0)
+        	recomendacionStr+="No hemos encontrado recomendaciones para ti.";
         System.out.println("Recomendaciones encontradas: "
                 + recomendaciones.size());
         System.out.println(recomendacionStr);
@@ -179,18 +181,18 @@ public class Application extends Controller {
 		double maxdistance = estadisticas.maxDistance;
 		double mindistance = estadisticas.minDistance;
 
-		Recommendation[] recomendaciones = new Recommendation[0];
+		List<Recommendation> recomendaciones = new ArrayList<Recommendation>();
 		String recomendacionStr = "";
-		/**if (user != -1) {
+		if (user != -1) {
 			recomendaciones = recommenderSystem.getUserRecommendation(user, 10);
 		}
-		for (int i = 0; i < recomendaciones.length; i++) {
-			recomendacionStr += recomendaciones[i].toString() + "\n";
+		for (int i = 0; i < recomendaciones.size(); i++) {
+			recomendacionStr += recomendaciones.get(i).toString() + "\n";
 		}
 		System.out.println("Recomendaciones encontradas: "
-				+ recomendaciones.length);
+				+ recomendaciones.size());
 		System.out.println(recomendacionStr);
-		
+		/**
 		 * double averageDistance = 21; double standardDeviation = 22; double
 		 * maxdistance = 23; double mindistance = 24;
 		 */
