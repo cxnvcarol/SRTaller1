@@ -12,7 +12,6 @@ hs_err_pid*
 
 # Ignore Play! working directory #
 bin/
-/db
 .eclipse
 /logs/
 /modules
