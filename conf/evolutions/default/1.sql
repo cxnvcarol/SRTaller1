@@ -4,17 +4,16 @@
 # --- !Ups
 
 create table movie (
-  id                        bigint not null,
+  id                        integer primary key AUTOINCREMENT,
   average_rating            double,
   num_ratings               integer,
   name                      varchar(255),
-  categories                varchar(255),
-  constraint pk_movie primary key (id))
+  categories                varchar(255))
 ;
 
 create table rating (
   rating                    double,
-  timestamp                 bigint)
+  timestamp                 integer)
 ;
 
 create table recommendation (
@@ -25,8 +24,8 @@ create table result_model (
   distance                  double,
   estimated_rating          double,
   real_rating               double,
-  item_id                   bigint,
-  user_id                   bigint)
+  item_id                   integer,
+  user_id                   integer)
 ;
 
 create table statistics_model (
@@ -40,38 +39,29 @@ create table statistics_model (
 ;
 
 create table user (
-  id                        bigint not null,
-  ratings_model             boolean,
-  is_new_user               boolean,
-  constraint pk_user primary key (id))
+  id                        integer primary key AUTOINCREMENT,
+  ratings_model             integer(1),
+  is_new_user               integer(1))
 ;
-
-create sequence movie_seq;
-
-create sequence user_seq;
 
 
 
 
 # --- !Downs
 
-SET REFERENTIAL_INTEGRITY FALSE;
+PRAGMA foreign_keys = OFF;
 
-drop table if exists movie;
+drop table movie;
 
-drop table if exists rating;
+drop table rating;
 
-drop table if exists recommendation;
+drop table recommendation;
 
-drop table if exists result_model;
+drop table result_model;
 
-drop table if exists statistics_model;
+drop table statistics_model;
 
-drop table if exists user;
+drop table user;
 
-SET REFERENTIAL_INTEGRITY TRUE;
-
-drop sequence if exists movie_seq;
-
-drop sequence if exists user_seq;
+PRAGMA foreign_keys = ON;
 
